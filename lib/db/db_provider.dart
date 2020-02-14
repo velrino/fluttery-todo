@@ -14,17 +14,38 @@ class DBProvider {
   static final DBProvider db = DBProvider._();
 
   var todos = [
-    Todo("Vegetables", parent: '1',),
-    Todo("Birthday gift", parent: '1',),
+    Todo(
+      "Vegetables",
+      parent: '1',
+    ),
+    Todo(
+      "Birthday gift",
+      parent: '1',
+    ),
     Todo("Chocolate cookies", parent: '1', isCompleted: 1),
-    Todo("20 pushups", parent: '2',),
-    Todo("Tricep", parent: '2',),
-    Todo("15 burpees (3 sets)", parent: '2',),
+    Todo(
+      "20 pushups",
+      parent: '2',
+    ),
+    Todo(
+      "Tricep",
+      parent: '2',
+    ),
+    Todo(
+      "15 burpees (3 sets)",
+      parent: '2',
+    ),
   ];
 
   var tasks = [
-    Task('Shopping', id: '1',  color: Colors.purple.value, codePoint: Icons.shopping_cart.codePoint),
-    Task('Workout', id: '2', color: Colors.pink.value, codePoint: Icons.fitness_center.codePoint),
+    Task('Shopping',
+        id: '1',
+        color: Colors.purple.value,
+        codePoint: Icons.shopping_cart.codePoint),
+    Task('Workout',
+        id: '2',
+        color: Colors.pink.value,
+        codePoint: Icons.fitness_center.codePoint),
   ];
 
   Future<Database> get database async {
@@ -45,9 +66,8 @@ class DBProvider {
 
   initDB() async {
     String path = await _dbPath;
-    return await openDatabase(path, version: 1, onOpen: (db) {
-
-    }, onCreate: (Database db, int version) async {
+    return await openDatabase(path, version: 1, onOpen: (db) {},
+        onCreate: (Database db, int version) async {
       print("DBProvider:: onCreate()");
       await db.execute("CREATE TABLE Task ("
           "id TEXT PRIMARY KEY,"
@@ -64,31 +84,34 @@ class DBProvider {
     });
   }
 
-  insertBulkTask(List<Task> tasks) async {
+  insert(List<dynamic> data, String table) async {
     final db = await database;
-    tasks.forEach((it) async {
-      var res = await db.insert("Task", it.toJson());
-      print("Task ${it.id} = $res");
-    });
-  }
-
-  insertBulkTodo(List<Todo> todos) async {
-    final db = await database;
-    todos.forEach((it) async {
-      var res = await db.insert("Todo", it.toJson());
+    data.forEach((it) async {
+      var res = await db.insert(table, it.toJson());
       print("Todo ${it.id} = $res");
     });
   }
 
-  Future<List<Task>> getAllTask() async {
+  Future<List<dynamic>> getAll(String table) async {
     final db = await database;
-    var result = await db.query('Task');
+    return await db.query(table);
+  }
+
+  insertBulkTask(List<Task> tasks) async {
+    await this.insert(tasks, 'Task');
+  }
+
+  insertBulkTodo(List<Todo> todos) async {
+    await this.insert(todos, 'Todo');
+  }
+
+  Future<List<Task>> getAllTask() async {
+    final result = await this.getAll('Task');
     return result.map((it) => Task.fromJson(it)).toList();
   }
 
   Future<List<Todo>> getAllTodo() async {
-    final db = await database;
-    var result = await db.query('Todo');
+    final result = await this.getAll('Todo');
     return result.map((it) => Todo.fromJson(it)).toList();
   }
 
